@@ -73,6 +73,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
         {
             //Get the list of all the files, then for each file open a separate streamer.
             var compressedRawDatafiles = Directory.EnumerateFiles(_remote, _remoteMask).Select(f => new FileInfo(f)).ToList();
+            var rawDatafiles = new List<FileInfo>();
 
             Log.Trace("AlgoSeekOptionsConverter.Convert(): Loading {0} AlgoSeekOptionsReader for {1} ", compressedRawDatafiles.Count(), _referenceDate);
 
@@ -84,8 +85,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
 
             var random = new Random((int)DateTime.Now.Ticks);
 
-            //Process each file massively in parallel.
-            Parallel.ForEach(compressedRawDatafiles, parallelOptionsProcessing, compressedRawDatafile =>
+            foreach (var compressedRawDatafile in compressedRawDatafiles)
             {
                 var timer = DateTime.Now;
                 var rawDataFile = new FileInfo(Path.Combine(_source, compressedRawDatafile.Name.Replace(".bz2", "")));
@@ -107,6 +107,13 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
 
                 Log.Trace($"AlgoSeekOptionsConverter.Convert(): Extraction successful in {DateTime.Now - timer:g}, deleting {compressedRawDatafile.Name}.");
                 File.Delete(compressedRawDatafile.FullName);
+                rawDatafiles.Add(rawDataFile);
+            }
+
+
+            //Process each file massively in parallel.
+            Parallel.ForEach(rawDatafiles, parallelOptionsProcessing, rawDataFile =>
+            {
                 Log.Trace("Source File :" + rawDataFile.Name);
 
                 // setting up local processors and the flush event

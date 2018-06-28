@@ -36,8 +36,6 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
     /// </summary>
     public class AlgoSeekOptionsConverter
     {
-        private const int execTimeout = 600;// sec
-
         private string _source;
         private string _remote;
         private string _remoteMask;
@@ -75,7 +73,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
             var compressedRawDatafiles = Directory.EnumerateFiles(_remote, _remoteMask).Select(f => new FileInfo(f)).ToList();
             var rawDatafiles = new List<FileInfo>();
 
-            Log.Trace("AlgoSeekOptionsConverter.Convert(): Loading {0} AlgoSeekOptionsReader for {1} ", compressedRawDatafiles.Count(), _referenceDate);
+            Log.Trace("AlgoSeekOptionsConverter.Convert(): Loading {0} AlgoSeekOptionsReader for {1} ", compressedRawDatafiles.Count, _referenceDate);
 
             //Initialize parameters
             var totalLinesProcessed = 0L;   
@@ -277,8 +275,6 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
         /// </summary>
         public void Package(DateTime date)
         {
-            var zipper = OS.IsWindows ? "C:/Program Files/7-Zip/7z.exe" : "7z";
-
             Log.Trace("AlgoSeekOptionsConverter.Package(): Zipping all files ...");
 
             var destination = Path.Combine(_destination, "option");
@@ -373,7 +369,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
             {
                 try
                 {
-                    BZip2.Decompress(fileToDecompressAsStream, decompressedStream, true);
+                    BZip2.Decompress(fileToDecompressAsStream, decompressedStream);
                     outcome = true;
                 }
                 catch (Exception ex)

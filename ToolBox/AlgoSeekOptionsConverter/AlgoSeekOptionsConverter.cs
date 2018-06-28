@@ -79,7 +79,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
 
             //Initialize parameters
             var totalLinesProcessed = 0L;   
-            var totalFiles = compressedRawDatafiles.Count();
+            var totalFiles = compressedRawDatafiles.Count;
             var totalFilesProcessed = 0;
             var start = DateTime.MinValue;
 
@@ -87,7 +87,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
 
             foreach (var compressedRawDatafile in compressedRawDatafiles)
             {
-                var timer = DateTime.Now;
+                var timer = DateTime.UtcNow;
                 var rawDataFile = new FileInfo(Path.Combine(_source, compressedRawDatafile.Name.Replace(".bz2", "")));
                 var decompressSuccessful = false;
                 var counter = 1;
@@ -105,8 +105,8 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
                     throw new NotImplementedException();
                 }
 
-                Log.Trace($"AlgoSeekOptionsConverter.Convert(): Extraction successful in {DateTime.Now - timer:g}, deleting {compressedRawDatafile.Name}.");
-                File.Delete(compressedRawDatafile.FullName);
+                Log.Trace($"AlgoSeekOptionsConverter.Convert(): Extraction successful in {DateTime.UtcNow - timer:g}, deleting {compressedRawDatafile.Name}.");
+                compressedRawDatafile.Delete();
                 rawDatafiles.Add(rawDataFile);
             }
 
@@ -178,7 +178,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
                     WriteToDisk(processors, waitForFlush, DateTime.MaxValue, flushStep, true);
 
                     Log.Trace("AlgoSeekOptionsConverter.Convert(): Cleaning up extracted options file {0}", rawDataFile.FullName);
-                    File.Delete(rawDataFile.FullName);
+                    rawDataFile.Delete();
                 }
 
                 processors = null;
@@ -378,8 +378,7 @@ namespace QuantConnect.ToolBox.AlgoSeekOptionsConverter
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"AlgoSeekOptionsConverter.DecompressOpraFile({compressedRawDatafile.Name}, {rawDatafile.Name}): SharpzipLib.BZip2.Decompress returned error: " + ex.Message);
-                    Console.WriteLine(ex.Message);
+                    Log.Error($"AlgoSeekOptionsConverter.DecompressOpraFile({compressedRawDatafile.Name}, {rawDatafile.Name}): SharpzipLib.BZip2.Decompress returned error: " + ex);
                 }
             }
             return outcome;
